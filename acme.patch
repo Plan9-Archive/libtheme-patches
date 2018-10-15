@@ -1,0 +1,124 @@
+diff -r 682cd3c12782 sys/src/cmd/acme/acme.c
+--- a/sys/src/cmd/acme/acme.c	Fri Apr 22 03:41:06 2016 +0200
++++ b/sys/src/cmd/acme/acme.c	Fri Apr 22 21:29:23 2016 +0000
+@@ -8,6 +8,7 @@
+ #include <frame.h>
+ #include <fcall.h>
+ #include <plumb.h>
++#include <theme.h>
+ #include "dat.h"
+ #include "fns.h"
+ 	/* for generating syms in mkfile only: */
+@@ -863,19 +864,21 @@
+ 	Rectangle r;
+ 	Image *tmp;
+ 
++	themeinit();
++
+ 	/* Blue */
+-	tagcols[BACK] = allocimagemix(display, DPalebluegreen, DWhite);
+-	tagcols[HIGH] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DPalegreygreen);
+-	tagcols[BORD] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DPurpleblue);
+-	tagcols[TEXT] = display->black;
+-	tagcols[HTEXT] = display->black;
++	tagcols[BACK] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("cmdback", 0xFFFFD4FF));
++	tagcols[HIGH] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("cmdhigh", DPalegreygreen));
++	tagcols[BORD] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("cmdbord", DPurpleblue));
++	tagcols[TEXT] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("cmdtext", DBlack));
++	tagcols[HTEXT] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("cmdhtext", DBlack));
+ 
+ 	/* Yellow */
+-	textcols[BACK] = allocimagemix(display, DPaleyellow, DWhite);
+-	textcols[HIGH] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DDarkyellow);
+-	textcols[BORD] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DYellowgreen);
+-	textcols[TEXT] = display->black;
+-	textcols[HTEXT] = display->black;
++	textcols[BACK] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("mainback", 0xFFFFD4FF));
++	textcols[HIGH] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("mainhigh", DDarkyellow));
++	textcols[BORD] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("mainbord", DYellowgreen));
++	textcols[TEXT] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("maintext", DBlack));
++	textcols[HTEXT] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("mainhtext", DBlack));
+ 
+ 	if(button){
+ 		freeimage(button);
+@@ -904,6 +907,8 @@
+ 
+ 	but2col = allocimage(display, r, screen->chan, 1, 0xAA0000FF);
+ 	but3col = allocimage(display, r, screen->chan, 1, 0x006600FF);
++
++	themeend();
+ }
+ 
+ /*
+diff -r 682cd3c12782 sys/src/cmd/acme/cols.c
+--- a/sys/src/cmd/acme/cols.c	Fri Apr 22 03:41:06 2016 +0200
++++ b/sys/src/cmd/acme/cols.c	Fri Apr 22 21:29:23 2016 +0000
+@@ -17,7 +17,7 @@
+ 	Rectangle r1;
+ 	Text *t;
+ 
+-	draw(screen, r, display->white, nil, ZP);
++	draw(screen, r, display->black, nil, ZP);
+ 	c->r = r;
+ 	c->w = nil;
+ 	c->nw = 0;
+@@ -134,7 +134,7 @@
+ 	c->nw--;
+ 	c->w = realloc(c->w, c->nw*sizeof(Window*));
+ 	if(c->nw == 0){
+-		draw(screen, r, display->white, nil, ZP);
++		draw(screen, r, display->black, nil, ZP);
+ 		return;
+ 	}
+ 	if(i == c->nw){		/* extend last window down */
+diff -r 682cd3c12782 sys/src/cmd/acme/mkfile
+--- a/sys/src/cmd/acme/mkfile	Fri Apr 22 03:41:06 2016 +0200
++++ b/sys/src/cmd/acme/mkfile	Fri Apr 22 21:29:23 2016 +0000
+@@ -36,7 +36,7 @@
+ 
+ </sys/src/cmd/mkone
+ 
+-$O.out:	/$objtype/lib/libframe.a /$objtype/lib/libdraw.a /$objtype/lib/libthread.a
++$O.out:	/$objtype/lib/libframe.a /$objtype/lib/libdraw.a /$objtype/lib/libthread.a /$objtype/lib/libtheme.a
+ 
+ edit.$O ecmd.$O elog.$O:	edit.h
+ 
+diff -r 682cd3c12782 sys/src/cmd/acme/rows.c
+--- a/sys/src/cmd/acme/rows.c	Fri Apr 22 03:41:06 2016 +0200
++++ b/sys/src/cmd/acme/rows.c	Fri Apr 22 21:29:23 2016 +0000
+@@ -18,7 +18,7 @@
+ 	Rectangle r1;
+ 	Text *t;
+ 
+-	draw(screen, r, display->white, nil, ZP);
++	draw(screen, r, display->black, nil, ZP);
+ 	row->r = r;
+ 	row->col = nil;
+ 	row->ncol = 0;
+@@ -63,7 +63,7 @@
+ 		r = d->r;
+ 		if(Dx(r) < 100)
+ 			return nil;
+-		draw(screen, r, display->white, nil, ZP);
++		draw(screen, r, display->black, nil, ZP);
+ 		r1 = r;
+ 		r1.max.x = min(x, r.max.x-50);
+ 		if(Dx(r1) < 50)
+@@ -178,7 +178,7 @@
+ 		p.x = c->r.max.x-80-Scrollwid;
+ 	r = d->r;
+ 	r.max.x = c->r.max.x;
+-	draw(screen, r, display->white, nil, ZP);
++	draw(screen, r, display->black, nil, ZP);
+ 	r.max.x = p.x;
+ 	colresize(d, r);
+ 	r = c->r;
+@@ -210,7 +210,7 @@
+ 	row->ncol--;
+ 	row->col = realloc(row->col, row->ncol*sizeof(Column*));
+ 	if(row->ncol == 0){
+-		draw(screen, r, display->white, nil, ZP);
++		draw(screen, r, display->black, nil, ZP);
+ 		return;
+ 	}
+ 	if(i == row->ncol){		/* extend last column right */

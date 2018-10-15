@@ -1,0 +1,47 @@
+--- /sys/src/cmd/faces/main.c	Sun Jul  8 09:18:00 2018
++++ main.c	Sun Oct 14 14:34:51 2018
+@@ -5,6 +5,7 @@
+ #include <regexp.h>
+ #include <event.h>	/* for support routines only */
+ #include <bio.h>
++#include <theme.h>
+ #include "faces.h"
+ 
+ int	history = 0;	/* use old interface, showing history of mailbox rather than current state */
+@@ -95,12 +96,13 @@
+ 		exits("mouse");
+ 	}
+ 	initplumb();
++	themeinit("faces");
+ 
+ 	/* make background color */
+-	bgrnd = allocimagemix(display, DPalebluegreen, DWhite);
+-	blue = allocimage(display, Rect(0,0,1,1), screen->chan, 1, 0x008888FF);	/* blue-green */
+-	left = allocimage(display, leftright, GREY1, 0, DWhite);
+-	right = allocimage(display, leftright, GREY1, 0, DWhite);
++	bgrnd = allocimage(display, Rect(0,0,1,1), screen->chan, 1,themeget("background", 0xAAFFFFFF));
++	blue = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("brdr", 0x008888FF));	/* blue-green */
++	left = allocimage(display, leftright, GREY1, 0, themeget("left", DWhite));
++	right = allocimage(display, leftright, GREY1, 0, themeget("right", DWhite));
+ 	if(bgrnd==nil || blue==nil || left==nil || right==nil){
+ 		fprint(2, "faces: can't create images: %r\n");
+ 		exits("image");
+@@ -122,6 +124,8 @@
+ 	if(datefont->height & 1)	/* stipple parity */
+ 		facep.y++;
+ 	faces = nil;
++	
++	themeend();
+ }
+ 
+ void
+--- /sys/src/cmd/faces/mkfile	Sun Jul  8 09:18:00 2018
++++ mkfile	Thu Oct 11 21:56:22 2018
+@@ -22,5 +22,7 @@
+ </sys/src/cmd/mkone
+ CFLAGS=$CFLAGS '-DDEFAULT='$DEFAULT
+ 
++$O.out: /$objtype/lib/libtheme.a
++
+ $O.dblook: dblook.$O facedb.$O util.$O
+ 	$LD -o $target $prereq

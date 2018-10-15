@@ -1,0 +1,92 @@
+diff -r 682cd3c12782 sys/src/cmd/samterm/flayer.c
+--- a/sys/src/cmd/samterm/flayer.c	Fri Apr 22 03:41:06 2016 +0200
++++ b/sys/src/cmd/samterm/flayer.c	Fri Apr 22 22:18:12 2016 +0000
+@@ -5,6 +5,7 @@
+ #include <mouse.h>
+ #include <keyboard.h>
+ #include <frame.h>
++#include <theme.h>
+ #include "flayer.h"
+ #include "samterm.h"
+ 
+@@ -28,19 +29,23 @@
+ {
+ 	lDrect = r;
+ 
++	themeinit();
++
+ 	/* Main text is yellowish */
+-	maincols[BACK] = allocimagemix(display, DPaleyellow, DWhite);
+-	maincols[HIGH] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DDarkyellow);
+-	maincols[BORD] = allocimage(display, Rect(0,0,2,2), screen->chan, 1, DYellowgreen);
+-	maincols[TEXT] = display->black;
+-	maincols[HTEXT] = display->black;
++	maincols[BACK] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("mainback", 0xFFFFD4FF));
++	maincols[HIGH] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("mainhigh", DDarkyellow));
++	maincols[BORD] = allocimage(display, Rect(0,0,2,2), screen->chan, 1, themeget("mainbord", DYellowgreen));
++	maincols[TEXT] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("maintext", DBlack));
++	maincols[HTEXT] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("mainhtext", DBlack));
+ 
+ 	/* Command text is blueish */
+-	cmdcols[BACK] = allocimagemix(display, DPalebluegreen, DWhite);
+-	cmdcols[HIGH] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DPalegreygreen);
+-	cmdcols[BORD] = allocimage(display, Rect(0,0,2,2), screen->chan, 1, DPurpleblue);
+-	cmdcols[TEXT] = display->black;
+-	cmdcols[HTEXT] = display->black;
++	cmdcols[BACK] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("cmdback", 0xD4FFFFFF));
++	cmdcols[HIGH] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("cmdhigh", DPalegreygreen));
++	cmdcols[BORD] = allocimage(display, Rect(0,0,2,2), screen->chan, 1, themeget("cmdbord", DPurpleblue));
++	cmdcols[TEXT] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("cmdtext", DBlack));
++	cmdcols[HTEXT] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("cmdhtext", DBlack));
++
++	themeend();
+ }
+ 
+ void
+@@ -89,12 +94,12 @@
+ flclose(Flayer *l)
+ {
+ 	if(l->visible == All)
+-		draw(screen, l->entire, display->white, nil, ZP);
++		draw(screen, l->entire, display->black, nil, ZP);
+ 	else if(l->visible == Some){
+ 		if(l->f.b == 0)
+ 			l->f.b = allocimage(display, l->entire, screen->chan, 0, DNofill);
+ 		if(l->f.b){
+-			draw(l->f.b, l->entire, display->white, nil, ZP);
++			draw(l->f.b, l->entire, display->black, nil, ZP);
+ 			flrefresh(l, l->entire, 0);
+ 		}
+ 	}
+@@ -353,7 +358,7 @@
+ 	if(0 && Dx(dr)==Dx(olDrect) && Dy(dr)==Dy(olDrect))
+ 		move = 1;
+ 	else
+-		draw(screen, lDrect, display->white, nil, ZP);
++		draw(screen, lDrect, display->black, nil, ZP);
+ 	for(i=0; i<nllist; i++){
+ 		l = llist[i];
+ 		l->lastsr = ZR;
+diff -r 682cd3c12782 sys/src/cmd/samterm/mkfile
+--- a/sys/src/cmd/samterm/mkfile	Fri Apr 22 03:41:06 2016 +0200
++++ b/sys/src/cmd/samterm/mkfile	Fri Apr 22 22:18:12 2016 +0000
+@@ -17,6 +17,7 @@
+ 
+ LIB=	/$objtype/lib/libdraw.a\
+ 	/$objtype/lib/libframe.a\
++	/$objtype/lib/libtheme.a
+ 
+ BIN=/$objtype/bin/aux
+ 
+diff -r 682cd3c12782 sys/src/cmd/samterm/plan9.c
+--- a/sys/src/cmd/samterm/plan9.c	Fri Apr 22 03:41:06 2016 +0200
++++ b/sys/src/cmd/samterm/plan9.c	Fri Apr 22 22:18:12 2016 +0000
+@@ -46,7 +46,7 @@
+ 	if(t != nil)
+ 		maxtab = strtoul(t, nil, 0);
+ 	free(t);
+-	draw(screen, screen->clipr, display->white, nil, ZP);
++	draw(screen, screen->clipr, display->black, nil, ZP);
+ }
+ 
+ int

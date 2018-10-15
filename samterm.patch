@@ -13,7 +13,7 @@ diff -r 682cd3c12782 sys/src/cmd/samterm/flayer.c
  {
  	lDrect = r;
  
-+	themeinit();
++	themeinit("samterm");
 +
  	/* Main text is yellowish */
 -	maincols[BACK] = allocimagemix(display, DPaleyellow, DWhite);

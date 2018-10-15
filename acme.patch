@@ -13,7 +13,7 @@ diff -r 682cd3c12782 sys/src/cmd/acme/acme.c
  	Rectangle r;
  	Image *tmp;
  
-+	themeinit();
++	themeinit("acme");
 +
  	/* Blue */
 -	tagcols[BACK] = allocimagemix(display, DPalebluegreen, DWhite);

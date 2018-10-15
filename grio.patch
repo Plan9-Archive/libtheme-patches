@@ -1,0 +1,79 @@
+--- /sys/src/ants/grio/data.c	Thu Mar  1 03:11:57 2018
++++ ./data.c	Thu Oct 11 13:51:41 2018
+@@ -7,6 +7,7 @@
+ #include <keyboard.h>
+ #include <frame.h>
+ #include <fcall.h>
++#include <theme.h>
+ #include "dat.h"
+ #include "fns.h"
+ 
+@@ -189,22 +190,23 @@
+ {
+ 	int fd;
+ 	Image *bimg = nil;
++	themeinit("rio");
+ 
+-	background = allocimage(display, Rect(0,0,1,1), RGB24, 1, bgtrans);
++	background = allocimage(display, Rect(0,0,1,1), RGB24, 1, themeget("background", bgtrans));
+ 
+ 	/* greys are multiples of 0x11111100+0xFF, 14* being palest */
+-	cols[BACK] = allocimage(display, Rect(0,0,1,1), CMAP8, 1, winbgcolor^reverse);
+-	cols[BORD] = allocimage(display, Rect(0,0,1,1), CMAP8, 1, scrollbarcolor^reverse);
+-	cols[TEXT] = allocimage(display, Rect(0,0,1,1), CMAP8, 1, textcolor^reverse);
+-	cols[HTEXT] = allocimage(display, Rect(0,0,1,1), CMAP8, 1, 0x000000FF);
++	cols[BACK] = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("termback", winbgcolor^reverse));
++	cols[BORD] = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("termbord", scrollbarcolor^reverse));
++	cols[TEXT] = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("termtext", textcolor^reverse));
++	cols[HTEXT] = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("termhtext", 0x000000FF));
+ 	if(!reverse) {
+-		cols[HIGH] = allocimage(display, Rect(0,0,1,1), CMAP8, 1, 0xCCCCCCFF);
+-		titlecol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, borderactivecolor);
+-		lighttitlecol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, borderbgcolor);
++		cols[HIGH] = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("termhigh", 0xCCCCCCFF));
++		titlecol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("title", borderactivecolor));
++		lighttitlecol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("lighttitle", borderbgcolor));
+ 	} else {
+-		cols[HIGH] = allocimage(display, Rect(0,0,1,1), CMAP8, 1, DPurpleblue);
+-		titlecol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, borderactivecolor);
+-		lighttitlecol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, borderbgcolor);
++		cols[HIGH] = allocimage(display, Rect(0,0,1,1), CMAP8, 1,themeget("termhigh", DPurpleblue));
++		titlecol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("title", borderactivecolor));
++		lighttitlecol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("lighttitle", borderbgcolor));
+ 	}
+ 	if(bf != nil){
+ 		fd = open(bf, OREAD);
+@@ -218,14 +220,16 @@
+ 		background = allocimage(display, Rect(0, 0, Dx(bimg->r), Dy(bimg->r)), RGB24, 1, 0xFFFFFFFF);
+ 		draw(background, background->r, bimg, 0, bimg->r.min);
+ 	}
+-	dholdcol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, DMedblue);
+-	lightholdcol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, DGreyblue);
+-	paleholdcol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, DPalegreyblue);
+-	paletextcol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, 0x666666FF^reverse);
+-	sizecol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, DRed);
++	dholdcol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("hold", DMedblue));
++	lightholdcol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("lighthold", DGreyblue));
++	paleholdcol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("palehold", DPalegreyblue));
++	paletextcol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("paletext", 0x666666FF^reverse));
++	sizecol = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("size", DRed));
+ 
+ 	if(reverse == 0)
+ 		holdcol = dholdcol;
+ 	else
+ 		holdcol = paleholdcol;
++
++	themeend();
+ }
+--- /sys/src/ants/grio/mkfile	Fri Jan  5 14:57:30 2018
++++ ./mkfile	Wed Oct 10 00:31:57 2018
+@@ -24,7 +24,8 @@
+ </sys/src/cmd/mkone
+ 
+ $O.out:	/$objtype/lib/libdraw.a /$objtype/lib/libframe.a \
+-	/$objtype/lib/libthread.a /$objtype/lib/libplumb.a /$objtype/lib/libc.a
++	/$objtype/lib/libthread.a /$objtype/lib/libplumb.a \
++	/$objtype/lib/libtheme.a /$objtype/lib/libc.a
+ syms:V:
+ 	$CC -a $CFLAGS rio.c	> syms
+ 	$CC -aa $CFLAGS *.c 	>>syms

@@ -1,4 +1,4 @@
-== libtheme patches
+## libtheme patches
 
 this repo contains files to patch software to use libtheme.
 

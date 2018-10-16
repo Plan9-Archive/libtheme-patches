@@ -2,7 +2,8 @@ PROGS=\
 	acme \
 	faces \
 	rio \
-	samterm
+	samterm \
+	clock
 
 PWD=`{pwd}
 

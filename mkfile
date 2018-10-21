@@ -3,7 +3,8 @@ PROGS=\
 	faces \
 	rio \
 	samterm \
-	clock
+	clock \
+	winwatch
 
 PWD=`{pwd}
 

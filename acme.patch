@@ -1,6 +1,6 @@
-diff -r 682cd3c12782 sys/src/cmd/acme/acme.c
---- a/sys/src/cmd/acme/acme.c	Fri Apr 22 03:41:06 2016 +0200
-+++ b/sys/src/cmd/acme/acme.c	Fri Apr 22 21:29:23 2016 +0000
+diff -u /sys/src/cmd/acme/acme.c acme/acme.c
+--- /sys/src/cmd/acme/acme.c	Sun Oct 21 04:51:43 2018
++++ acme/acme.c	Sun Oct 21 14:17:18 2018
 @@ -8,6 +8,7 @@
  #include <frame.h>
  #include <fcall.h>
@@ -9,7 +9,15 @@ diff -r 682cd3c12782 sys/src/cmd/acme/acme.c
  #include "dat.h"
  #include "fns.h"
  	/* for generating syms in mkfile only: */
-@@ -863,19 +864,21 @@
+@@ -226,6 +227,7 @@
+ 			}
+ 	}
+ 	flushimage(display, 1);
++	themeend();
+ 
+ 	acmeerrorinit();
+ 	threadcreate(keyboardthread, nil, STACK);
+@@ -865,19 +867,21 @@
  	Rectangle r;
  	Image *tmp;
  
@@ -41,39 +49,46 @@ diff -r 682cd3c12782 sys/src/cmd/acme/acme.c
  
  	if(button){
  		freeimage(button);
-@@ -904,6 +907,8 @@
+diff -u /sys/src/cmd/acme/cols.c acme/cols.c
+--- /sys/src/cmd/acme/cols.c	Sun Oct 21 04:51:43 2018
++++ acme/cols.c	Sun Oct 21 14:02:08 2018
+@@ -8,16 +8,23 @@
+ #include <frame.h>
+ #include <fcall.h>
+ #include <plumb.h>
++#include <theme.h>
+ #include "dat.h"
+ #include "fns.h"
  
- 	but2col = allocimage(display, r, screen->chan, 1, 0xAA0000FF);
- 	but3col = allocimage(display, r, screen->chan, 1, 0x006600FF);
++Image *background;
 +
-+	themeend();
- }
- 
- /*
-diff -r 682cd3c12782 sys/src/cmd/acme/cols.c
---- a/sys/src/cmd/acme/cols.c	Fri Apr 22 03:41:06 2016 +0200
-+++ b/sys/src/cmd/acme/cols.c	Fri Apr 22 21:29:23 2016 +0000
-@@ -17,7 +17,7 @@
+ void
+ colinit(Column *c, Rectangle r)
+ {
  	Rectangle r1;
  	Text *t;
  
 -	draw(screen, r, display->white, nil, ZP);
-+	draw(screen, r, display->black, nil, ZP);
++	if(background == nil){
++		background = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("background", DBlack));
++	}
++
++	draw(screen, r, background, nil, ZP);
  	c->r = r;
  	c->w = nil;
  	c->nw = 0;
-@@ -134,7 +134,7 @@
+@@ -134,7 +141,7 @@
  	c->nw--;
  	c->w = realloc(c->w, c->nw*sizeof(Window*));
  	if(c->nw == 0){
 -		draw(screen, r, display->white, nil, ZP);
-+		draw(screen, r, display->black, nil, ZP);
++		draw(screen, r, background, nil, ZP);
  		return;
  	}
  	if(i == c->nw){		/* extend last window down */
-diff -r 682cd3c12782 sys/src/cmd/acme/mkfile
---- a/sys/src/cmd/acme/mkfile	Fri Apr 22 03:41:06 2016 +0200
-+++ b/sys/src/cmd/acme/mkfile	Fri Apr 22 21:29:23 2016 +0000
+diff -u /sys/src/cmd/acme/mkfile acme/mkfile
+--- /sys/src/cmd/acme/mkfile	Sun Oct 21 04:51:43 2018
++++ acme/mkfile	Sun Oct 21 05:05:14 2018
 @@ -36,7 +36,7 @@
  
  </sys/src/cmd/mkone
@@ -83,42 +98,58 @@ diff -r 682cd3c12782 sys/src/cmd/acme/mkfile
  
  edit.$O ecmd.$O elog.$O:	edit.h
  
-diff -r 682cd3c12782 sys/src/cmd/acme/rows.c
---- a/sys/src/cmd/acme/rows.c	Fri Apr 22 03:41:06 2016 +0200
-+++ b/sys/src/cmd/acme/rows.c	Fri Apr 22 21:29:23 2016 +0000
-@@ -18,7 +18,7 @@
+diff -u /sys/src/cmd/acme/rows.c acme/rows.c
+--- /sys/src/cmd/acme/rows.c	Sun Oct 21 04:51:43 2018
++++ acme/rows.c	Sun Oct 21 14:02:23 2018
+@@ -9,16 +9,23 @@
+ #include <fcall.h>
+ #include <bio.h>
+ #include <plumb.h>
++#include <theme.h>
+ #include "dat.h"
+ #include "fns.h"
+ 
++Image *background;
++
+ void
+ rowinit(Row *row, Rectangle r)
+ {
  	Rectangle r1;
  	Text *t;
  
 -	draw(screen, r, display->white, nil, ZP);
-+	draw(screen, r, display->black, nil, ZP);
++	if(background == nil){
++		background = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("background", DBlack));
++	}
++
++	draw(screen, r, background, nil, ZP);
  	row->r = r;
  	row->col = nil;
  	row->ncol = 0;
-@@ -63,7 +63,7 @@
+@@ -63,7 +70,7 @@
  		r = d->r;
  		if(Dx(r) < 100)
  			return nil;
 -		draw(screen, r, display->white, nil, ZP);
-+		draw(screen, r, display->black, nil, ZP);
++		draw(screen, r, background, nil, ZP);
  		r1 = r;
  		r1.max.x = min(x, r.max.x-50);
  		if(Dx(r1) < 50)
-@@ -178,7 +178,7 @@
+@@ -178,7 +185,7 @@
  		p.x = c->r.max.x-80-Scrollwid;
  	r = d->r;
  	r.max.x = c->r.max.x;
 -	draw(screen, r, display->white, nil, ZP);
-+	draw(screen, r, display->black, nil, ZP);
++	draw(screen, r, background, nil, ZP);
  	r.max.x = p.x;
  	colresize(d, r);
  	r = c->r;
-@@ -210,7 +210,7 @@
+@@ -210,7 +217,7 @@
  	row->ncol--;
  	row->col = realloc(row->col, row->ncol*sizeof(Column*));
  	if(row->ncol == 0){
 -		draw(screen, r, display->white, nil, ZP);
-+		draw(screen, r, display->black, nil, ZP);
++		draw(screen, r, background, nil, ZP);
  		return;
  	}
  	if(i == row->ncol){		/* extend last column right */

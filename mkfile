@@ -4,7 +4,8 @@ PROGS=\
 	rio \
 	samterm \
 	clock \
-	winwatch
+	winwatch \
+	mothra
 
 PWD=`{pwd}
 

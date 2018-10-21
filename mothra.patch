@@ -1,0 +1,29 @@
+diff -ur /sys/src/cmd/mothra/libpanel/draw.c mothra/libpanel/draw.c
+--- /sys/src/cmd/mothra/libpanel/draw.c	Sun Jul  8 09:18:06 2018
++++ mothra/libpanel/draw.c	Sun Oct 21 04:06:05 2018
+@@ -3,6 +3,7 @@
+ #include <draw.h>
+ #include <event.h>
+ #include <panel.h>
++#include <theme.h>
+ #include "pldefs.h"
+ #define	PWID	1	/* width of label border */
+ #define	BWID	1	/* width of button relief */
+@@ -17,11 +18,13 @@
+ static Image *pl_white, *pl_light, *pl_dark, *pl_black, *pl_hilit;
+ int pl_drawinit(int ldepth){
+ 	plldepth=ldepth;
+-	pl_white=allocimage(display, Rect(0,0,1,1), screen->chan, 1, 0xFFFFFFFF);
+-	pl_light=allocimagemix(display, DPalebluegreen, DWhite);
+-	pl_dark =allocimage(display, Rect(0,0,1,1), screen->chan, 1, DPurpleblue);
+-	pl_black=allocimage(display, Rect(0,0,1,1), screen->chan, 1, 0x000000FF);
++	themeinit("mothra");
++	pl_white=allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("white", 0xFFFFFFFF));
++	pl_light=allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("light", 0xAAFFFFFF));
++	pl_dark =allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("dark", DPurpleblue));
++	pl_black=allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("black", 0x000000FF));
+ 	pl_hilit=allocimage(display, Rect(0,0,1,1), CHAN1(CAlpha,8), 1, 0x80);
++	themeend();
+ 	if(pl_white==0 || pl_light==0 || pl_black==0 || pl_dark==0) return 0;
+ 	return 1;
+ }

@@ -1,0 +1,33 @@
+--- /sys/src/cmd/clock.c	Sun Jul  8 09:18:00 2018
++++ /usr/moody/src/clock/clock.c	Sun Oct 21 03:13:44 2018
+@@ -1,6 +1,7 @@
+ #include <u.h>
+ #include <libc.h>
+ #include <draw.h>
++#include <theme.h>
+ #include <event.h>
+ 
+ Image *hrhand, *minhand;
+@@ -68,16 +69,17 @@
+ 	char *mstr[] = {"exit", 0};
+ 	int key, timer;
+ 	int t;
+-
++	themeinit("clock");
+ 	if (initdraw(0, 0, "clock") < 0)
+ 		sysfatal("initdraw failed");
+-	back = allocimagemix(display, DPalebluegreen, DWhite);
++	back = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("background", 0xeaffffff));
+ 
+-	hrhand = allocimage(display, Rect(0,0,1,1), CMAP8, 1, DDarkblue);
+-	minhand = allocimage(display, Rect(0,0,1,1), CMAP8, 1, DPaleblue);
+-	dots = allocimage(display, Rect(0,0,1,1), CMAP8, 1, DBlue);
++	hrhand = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("hrhand", DDarkblue));
++	minhand = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("minhand", DPaleblue));
++	dots = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("dots", DBlue));
+ 	redraw(screen);
+ 
++	themeend();
+ 	einit(Emouse);
+ 	t = (30*1000);
+ 	timer = etimer(0, t);

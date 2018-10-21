@@ -1,0 +1,37 @@
+--- /sys/src/cmd/winwatch.c	Sun Jul  8 09:18:12 2018
++++ ./winwatch.c	Sun Oct 21 03:19:42 2018
+@@ -5,6 +5,7 @@
+ #include <event.h>
+ #include <regexp.h>
+ #include <keyboard.h>
++#include <theme.h>
+ 
+ enum {
+ 	VISIBLE = 1,
+@@ -335,14 +336,16 @@
+ 	if(argc)
+ 		usage();
+ 
++	themeinit("winwatch");
+ 	if(initdraw(0, fontname, "winwatch") < 0)
+ 		sysfatal("initdraw: %r");
+ 	lightblue = allocimagemix(display, DPalebluegreen, DWhite);
++	lightblue = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("background", 0xEAFFFFFF));
+ 
+-	statecol[0] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, 0xCCCCCCFF);
++	statecol[0] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("hidden", 0xCCCCCCFF));
+ 	statecol[1] = lightblue;
+ 	statecol[2] = lightblue;
+-	statecol[3] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DPalegreygreen);
++	statecol[3] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, themeget("active", DPalegreygreen));
+ 
+ 	for(i=0; i<nelem(statecol); i++)
+ 		if(statecol[i] == nil)
+@@ -352,6 +355,7 @@
+ 	redraw(screen, 1);
+ 	einit(Emouse|Ekeyboard);
+ 	Etimer = etimer(0, 2500);
++	themeend();
+ 
+ 	for(;;){
+ 		switch(eread(Emouse|Ekeyboard|Etimer, &e)){

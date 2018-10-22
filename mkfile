@@ -5,7 +5,8 @@ PROGS=\
 	samterm \
 	clock \
 	winwatch \
-	mothra
+	mothra \
+	stats
 
 PWD=`{pwd}
 

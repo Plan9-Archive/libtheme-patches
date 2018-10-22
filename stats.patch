@@ -1,0 +1,66 @@
+--- /sys/src/cmd/stats.c	Sun Sep  9 06:45:37 2018
++++ /usr/moody/src/stats/stats.c	Sun Oct 21 21:45:43 2018
+@@ -4,6 +4,7 @@
+ #include <draw.h>
+ #include <event.h>
+ #include <keyboard.h>
++#include <theme.h>
+ 
+ #define	MAXNUM	10	/* maximum number of numbers on data line */
+ 
+@@ -281,20 +282,41 @@
+ void
+ colinit(void)
+ {
+-	/* Peach */
+-	mkcol(0, 0xFFAAAAFF, 0xFFAAAAFF, 0xBB5D5DFF);
+-	/* Aqua */
+-	mkcol(1, DPalebluegreen, DPalegreygreen, DPurpleblue);
+-	/* Yellow */
+-	mkcol(2, DPaleyellow, DDarkyellow, DYellowgreen);
+-	/* Green */
+-	mkcol(3, DPalegreen, DMedgreen, DDarkgreen);
+-	/* Blue */
+-	mkcol(4, 0x00AAFFFF, 0x00AAFFFF, 0x0088CCFF);
+-	/* Grey */
+-	cols[5][0] = allocimage(display, Rect(0,0,1,1), CMAP8, 1, 0xEEEEEEFF);
+-	cols[5][1] = allocimage(display, Rect(0,0,1,1), CMAP8, 1, 0xCCCCCCFF);
+-	cols[5][2] = allocimage(display, Rect(0,0,1,1), CMAP8, 1, 0x888888FF);
++	int i;
++
++	themeinit("stats");
++	ulong statcolors[18] = {
++		/* Peach */
++		themeget("back1", 0xFFAAAAFF),
++		themeget("graph1", 0xFFAAAAFF),
++		themeget("tip1", 0xBB5D5DFF),
++		/* Aqua */
++		themeget("back2", DPalebluegreen),
++		themeget("graph2", DPalegreygreen),
++		themeget("tip2", DPurpleblue),
++		/* Yellow */
++		themeget("back3", DPaleyellow),
++		themeget("graph3", DDarkyellow),
++		themeget("tip3", DYellowgreen),
++		/* Green */
++		themeget("back4", DPalegreen),
++		themeget("graph4", DMedgreen),
++		themeget("tip4", DDarkgreen),
++		/* Blue */
++		themeget("back5", 0x00AAFFFF),
++		themeget("graph5", 0x00AAFFFF),
++		themeget("tip5", 0x0088CCFF),
++		/* Grey */
++		themeget("back6", 0xEEEEEEFF),
++		themeget("graph6", 0xCCCCCCFF),
++		themeget("tip6", 0x888888FF),
++	};
++	themeend();
++	
++	for(i=0; i<18; ){
++		mkcol(i/3, statcolors[i], statcolors[i+1], statcolors[i+2]);
++		i=i+3;
++	}
+ }
+ 
+ int

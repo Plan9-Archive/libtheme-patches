@@ -1,6 +1,6 @@
 diff -u /sys/src/cmd/acme/acme.c acme/acme.c
 --- /sys/src/cmd/acme/acme.c	Sun Oct 21 04:51:43 2018
-+++ acme/acme.c	Sun Oct 21 14:17:18 2018
++++ acme/acme.c	Sun Oct 28 22:47:07 2018
 @@ -8,6 +8,7 @@
  #include <frame.h>
  #include <fcall.h>
@@ -51,7 +51,7 @@ diff -u /sys/src/cmd/acme/acme.c acme/acme.c
  		freeimage(button);
 diff -u /sys/src/cmd/acme/cols.c acme/cols.c
 --- /sys/src/cmd/acme/cols.c	Sun Oct 21 04:51:43 2018
-+++ acme/cols.c	Sun Oct 21 14:02:08 2018
++++ acme/cols.c	Sun Oct 28 22:57:43 2018
 @@ -8,16 +8,23 @@
  #include <frame.h>
  #include <fcall.h>
@@ -86,9 +86,17 @@ diff -u /sys/src/cmd/acme/cols.c acme/cols.c
  		return;
  	}
  	if(i == c->nw){		/* extend last window down */
+@@ -183,6 +190,7 @@
+ 	Window *w;
+ 
+ 	clearmouse();
++	draw(screen, r, background, nil, ZP);
+ 	r1 = r;
+ 	r1.max.y = r1.min.y + c->tag.font->height;
+ 	textresize(&c->tag, r1);
 diff -u /sys/src/cmd/acme/mkfile acme/mkfile
 --- /sys/src/cmd/acme/mkfile	Sun Oct 21 04:51:43 2018
-+++ acme/mkfile	Sun Oct 21 05:05:14 2018
++++ acme/mkfile	Sun Oct 28 22:47:07 2018
 @@ -36,7 +36,7 @@
  
  </sys/src/cmd/mkone
@@ -100,7 +108,7 @@ diff -u /sys/src/cmd/acme/mkfile acme/mkfile
  
 diff -u /sys/src/cmd/acme/rows.c acme/rows.c
 --- /sys/src/cmd/acme/rows.c	Sun Oct 21 04:51:43 2018
-+++ acme/rows.c	Sun Oct 21 14:02:23 2018
++++ acme/rows.c	Sun Oct 28 22:47:07 2018
 @@ -9,16 +9,23 @@
  #include <fcall.h>
  #include <bio.h>

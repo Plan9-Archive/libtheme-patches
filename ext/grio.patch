@@ -1,5 +1,6 @@
---- /sys/src/ants/grio/data.c	Thu Mar  1 03:11:57 2018
-+++ ./data.c	Thu Oct 11 13:51:41 2018
+diff -r e87d9104e8fc data.c
+--- a/data.c	Mon Feb 19 08:15:49 2018 +0000
++++ b/data.c	Sun Dec 09 16:21:22 2018 -0600
 @@ -7,6 +7,7 @@
  #include <keyboard.h>
  #include <frame.h>
@@ -65,8 +66,9 @@
 +
 +	themeend();
  }
---- /sys/src/ants/grio/mkfile	Fri Jan  5 14:57:30 2018
-+++ ./mkfile	Wed Oct 10 00:31:57 2018
+diff -r e87d9104e8fc mkfile
+--- a/mkfile	Mon Feb 19 08:15:49 2018 +0000
++++ b/mkfile	Sun Dec 09 16:21:22 2018 -0600
 @@ -24,7 +24,8 @@
  </sys/src/cmd/mkone
  
@@ -77,3 +79,122 @@
  syms:V:
  	$CC -a $CFLAGS rio.c	> syms
  	$CC -aa $CFLAGS *.c 	>>syms
+diff -r e87d9104e8fc rio.c
+--- a/rio.c	Mon Feb 19 08:15:49 2018 +0000
++++ b/rio.c	Sun Dec 09 16:21:22 2018 -0600
+@@ -29,7 +29,7 @@
+ Image*	sweep(void);
+ Image*	bandsize(Window*);
+ Image*	drag(Window*);
+-void		resized(void);
++void		resized(int new);
+ Channel	*exitchan;	/* chan(int) */
+ Channel	*winclosechan; /* chan(Window*); */
+ Channel	*kbdchan;	/* chan(char*); */
+@@ -602,7 +602,7 @@
+ 	for(;;)
+ 	    switch(alt(alts)){
+ 		case MReshape:
+-			resized();
++			resized(1);
+ 			break;
+ 		case MMouse:
+ 			if(wkeyboard!=nil && (mouse->buttons & (1<<5))){
+@@ -708,16 +708,17 @@
+ }
+ 
+ void
+-resized(void)
++resized(int new)
+ {
+ 	Image *im;
+ 	int i, j;
+ 	Rectangle r;
+ 	Point o, n;
+ 	Window *w;
+-
+-	if(getwindow(display, Refnone) < 0)
+-		error("failed to re-attach window");
++	
++	if(new)
++		if(getwindow(display, Refnone) < 0)
++			error("failed to re-attach window");
+ 	freescrtemps();
+ 	view = screen;
+ 	freescreen(wscreen);
+diff -r e87d9104e8fc wctl.c
+--- a/wctl.c	Mon Feb 19 08:15:49 2018 +0000
++++ b/wctl.c	Sun Dec 09 16:21:22 2018 -0600
+@@ -30,6 +30,7 @@
+ 	Hide,
+ 	Unhide,
+ 	Delete,
++	Background,
+ };
+ 
+ static char *cmds[] = {
+@@ -45,6 +46,7 @@
+ 	[Hide]	= "hide",
+ 	[Unhide]	= "unhide",
+ 	[Delete]	= "delete",
++	[Background]	= "background",
+ 	nil
+ };
+ 
+@@ -301,7 +303,7 @@
+ 
+ 	while(isspace(*s))
+ 		s++;
+-	if(cmd!=New && *s!='\0'){
++	if((cmd!=New && cmd!=Background) && *s!='\0'){
+ 		strcpy(err, "extraneous text in wctl message");
+ 		return -1;
+ 	}
+@@ -440,6 +442,20 @@
+ 	return -1;
+ }
+ 
++static void
++wctlbackground(char *file)
++{
++	char *n;
++	
++	if((n = strchr(file, '\n')) != nil)
++		*n = '\0';
++
++	freeimage(background);
++	iconinit(file);
++	extern void resized(int);
++	resized(0);
++}
++
+ int
+ writewctl(Xfid *x, char *err)
+ {
+@@ -473,6 +489,13 @@
+ 		if(pid > 0)
+ 			wsetpid(w, pid, 0);
+ 		return 1;
++	case Background:
++		if(*arg == '\0'){
++			strcpy(err, "invalid argument");
++			return -1;
++		}
++		wctlbackground(arg);
++		return 1;
+ 	}
+ 
+ 	incref(w);
+@@ -502,6 +525,12 @@
+ 		switch(cmd){
+ 		case New:
+ 			wctlnew(rect, arg, pid, hideit, scrollit, dir, err);
++			break;
++		case Background:
++			if(*arg == '\0')
++				break;
++			wctlbackground(arg);
++			break;
+ 		}
+ 		free(buf);
+ 	}

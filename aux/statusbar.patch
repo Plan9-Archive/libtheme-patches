@@ -1,0 +1,25 @@
+--- /sys/src/cmd/aux/statusbar.c	Sun Jul  8 09:18:00 2018
++++ /tmp/statusbar.c	Fri Dec 14 19:29:04 2018
+@@ -4,6 +4,7 @@
+ #include <bio.h>
+ #include <event.h>
+ #include <keyboard.h>
++#include <theme.h>
+ 
+ int newwin(char*);
+ 
+@@ -18,9 +19,11 @@
+ void
+ initcolor(void)
+ {
+-	text = display->black;
+-	light = allocimagemix(display, DPalegreen, DWhite);
+-	dark = allocimage(display, Rect(0,0,1,1), CMAP8, 1, DDarkgreen);
++	themeinit("statusbar");
++	text = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("text", DBlack));
++	light = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("background", DWhite));
++	dark = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("foreground", DDarkgreen));
++	themeend();
+ }
+ 
+ Rectangle rbar;

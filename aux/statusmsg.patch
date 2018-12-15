@@ -1,0 +1,23 @@
+--- /sys/src/cmd/aux/statusmsg.c	Sun Jul  8 09:18:00 2018
++++ /tmp/statusmsg.c	Fri Dec 14 19:28:20 2018
+@@ -4,6 +4,7 @@
+ #include <bio.h>
+ #include <event.h>
+ #include <keyboard.h>
++#include <theme.h>
+ 
+ int newwin(char*);
+ 
+@@ -20,8 +21,10 @@
+ void
+ initcolor(void)
+ {
+-	text = display->black;
+-	light = allocimagemix(display, DPalegreen, DWhite);
++	themeinit("statusmsg");
++	text = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("text", DBlack));
++	light = allocimage(display, Rect(0,0,1,1), CMAP8, 1, themeget("background", DWhite));
++	themeend();
+ }
+ 
+ void

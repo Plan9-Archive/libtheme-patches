@@ -6,7 +6,9 @@ PROGS=\
 	clock \
 	winwatch \
 	mothra \
-	stats
+	stats \
+	aux/statusbar \
+	aux/statusmsg 
 
 PWD=`{pwd}
 
